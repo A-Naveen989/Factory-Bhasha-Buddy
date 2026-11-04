@@ -269,8 +269,8 @@ function matchesKeyword(
   }
 
   // Indic-language keywords can represent partial word forms.
-  // Preserve substring matching for these scripts.
-  if (/[^\u0000-\u007F]/u.test(normalizedKeyword)) {
+  // Match non-ASCII letters using Unicode property escapes.
+  if (/[^\p{ASCII}]/u.test(normalizedKeyword)) {
     return normalizedText.includes(normalizedKeyword);
   }
 
@@ -319,7 +319,9 @@ function findMatchingIntent(
 function findSafetyTopic(
   normalizedText: string
 ): string | null {
-  for (const [topicId, keywords] of Object.entries(TOPIC_KEYWORDS)) {
+  for (const [topicId, keywords] of Object.entries(
+    TOPIC_KEYWORDS
+  )) {
     const matched = keywords.some((keyword) =>
       matchesKeyword(normalizedText, keyword)
     );
@@ -348,7 +350,9 @@ function detectNightShift(
 // MAIN QUERY CLASSIFIER
 // --------------------------------------------------
 
-export function classifyQuery(text: string): ClassifiedQuery {
+export function classifyQuery(
+  text: string
+): ClassifiedQuery {
   const normalizedText = normalizeText(text);
 
   // Handle empty input.

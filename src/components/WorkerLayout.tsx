@@ -6,15 +6,15 @@ import {
   GraduationCap,
   HardHat,
   Home,
+  LogOut,
   Megaphone,
-  X,
 } from 'lucide-react';
 
 import { AppLink } from '@/components/AppLink';
 import { useWorker } from '@/hooks/useWorker';
-
-import { usePathname } from '@/lib/router';
+import { usePathname, navigate } from '@/lib/router';
 import { LANGUAGES, t } from '@/lib/i18n';
+import { clearWorkerDemoAccess } from '@/lib/demoAccess';
 
 // --------------------------------------------------
 // NAVIGATION CONFIGURATION
@@ -46,8 +46,8 @@ function isTabActive(
   const currentPath = normalizePath(pathname);
   const targetPath = normalizePath(target);
 
-  if (targetPath === '/') {
-    return currentPath === '/';
+  if (targetPath === '/worker') {
+    return currentPath === '/worker';
   }
 
   return (
@@ -86,7 +86,7 @@ export function WorkerLayout({
 
   const tabs = [
     {
-      to: '/',
+      to: '/worker',
       label: t(language, 'navHome'),
       icon: NAVIGATION_ICONS.home,
     },
@@ -108,19 +108,22 @@ export function WorkerLayout({
   ];
 
   // --------------------------------------------------
+  // EXIT WORKER MODE
+  // --------------------------------------------------
+
+  function handleExitWorker(): void {
+    clearWorkerDemoAccess();
+    navigate('/');
+  }
+
+  // --------------------------------------------------
   // RENDER
   // --------------------------------------------------
 
   return (
-    <div className="
-      flex min-h-screen flex-col
-      bg-slate-50 text-slate-900
-    ">
+    <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
 
-      {/* ==========================================
-          SKIP NAVIGATION
-      =========================================== */}
-
+      {/* SKIP NAVIGATION */}
       <a
         href="#worker-main"
         className="
@@ -139,27 +142,26 @@ export function WorkerLayout({
         Skip to main content
       </a>
 
-      {/* ==========================================
-          HEADER
-      =========================================== */}
-
-      <header className="
-        sticky top-0 z-30
-        border-b border-slate-200
-        bg-white/95 backdrop-blur-md
-      ">
-
-        <div className="
-          mx-auto flex w-full max-w-md
-          items-center justify-between
-          gap-3 px-4 py-3
-        ">
+      {/* HEADER */}
+      <header
+        className="
+          sticky top-0 z-30
+          border-b border-slate-200
+          bg-white/95 backdrop-blur-md
+        "
+      >
+        <div
+          className="
+            mx-auto flex w-full max-w-md
+            items-center justify-between
+            gap-2 px-4 py-3
+          "
+        >
 
           {/* BRANDING */}
-
           <AppLink
-            to="/"
-            aria-label="Bhasha Buddy home"
+            to="/worker"
+            aria-label="Bhasha Buddy worker home"
             className="
               group flex min-w-0
               items-center gap-2
@@ -170,62 +172,93 @@ export function WorkerLayout({
               focus-visible:ring-offset-2
             "
           >
-            <span className="
-              flex h-10 w-10 shrink-0
-              items-center justify-center
-              rounded-xl bg-brand-700
-              text-white shadow-sm
-              transition-transform duration-200
-              group-hover:scale-105
-            ">
+            <span
+              className="
+                flex h-10 w-10 shrink-0
+                items-center justify-center
+                rounded-xl bg-brand-700
+                text-white shadow-sm
+                transition-transform duration-200
+                group-hover:scale-105
+              "
+            >
               <HardHat
                 className="h-5 w-5"
                 aria-hidden="true"
               />
             </span>
 
-            <span className="
-              truncate text-base
-              font-bold tracking-tight
-              text-brand-900
-            ">
+            <span
+              className="
+                truncate text-base
+                font-bold tracking-tight
+                text-brand-900
+              "
+            >
               Bhasha Buddy
             </span>
           </AppLink>
 
-          {/* LANGUAGE INDICATOR */}
+          {/* HEADER ACTIONS */}
+          <div className="flex shrink-0 items-center gap-2">
 
-          <span
-            lang={language}
-            title={`Selected language: ${languageLabel}`}
-            className="
-              inline-flex shrink-0
-              items-center gap-2
-              rounded-full border
-              border-slate-200 bg-slate-50
-              px-3 py-2
-              text-xs font-semibold
-              text-slate-700
-            "
-          >
+            {/* LANGUAGE INDICATOR */}
             <span
+              lang={language}
+              title={`Selected language: ${languageLabel}`}
               className="
-                h-2 w-2 rounded-full
-                bg-success-500
+                inline-flex shrink-0
+                items-center gap-2
+                rounded-full border
+                border-slate-200 bg-slate-50
+                px-3 py-2
+                text-xs font-semibold
+                text-slate-700
               "
-              aria-hidden="true"
-            />
+            >
+              <span
+                className="
+                  h-2 w-2 rounded-full
+                  bg-success-500
+                "
+                aria-hidden="true"
+              />
 
-            {languageLabel}
-          </span>
+              {languageLabel}
+            </span>
 
+            {/* EXIT WORKER MODE */}
+            <button
+              type="button"
+              onClick={handleExitWorker}
+              aria-label="Exit worker mode and change role"
+              title="Change role"
+              className="
+                flex h-10 w-10 shrink-0
+                items-center justify-center
+                rounded-xl border border-slate-200
+                bg-white text-slate-500
+                transition-colors
+                hover:border-error-200
+                hover:bg-error-50
+                hover:text-error-700
+                focus-visible:outline-none
+                focus-visible:ring-2
+                focus-visible:ring-brand-600
+                focus-visible:ring-offset-2
+              "
+            >
+              <LogOut
+                className="h-5 w-5"
+                aria-hidden="true"
+              />
+            </button>
+
+          </div>
         </div>
       </header>
 
-      {/* ==========================================
-          SAVE ERROR NOTIFICATION
-      =========================================== */}
-
+      {/* SAVE ERROR NOTIFICATION */}
       {saveError && (
         <div
           role="alert"
@@ -234,10 +267,12 @@ export function WorkerLayout({
             bg-rose-50 px-4 py-3
           "
         >
-          <div className="
-            mx-auto flex max-w-md
-            items-start gap-3
-          ">
+          <div
+            className="
+              mx-auto flex max-w-md
+              items-start gap-3
+            "
+          >
             <AlertTriangle
               className="
                 mt-0.5 h-5 w-5
@@ -246,22 +281,20 @@ export function WorkerLayout({
               aria-hidden="true"
             />
 
-            <p className="
-              flex-1 text-sm
-              font-medium leading-6
-              text-rose-800
-            ">
+            <p
+              className="
+                flex-1 text-sm
+                font-medium leading-6
+                text-rose-800
+              "
+            >
               {saveError}
             </p>
-
           </div>
         </div>
       )}
 
-      {/* ==========================================
-          MAIN CONTENT
-      =========================================== */}
-
+      {/* MAIN CONTENT */}
       <main
         id="worker-main"
         tabIndex={-1}
@@ -276,10 +309,7 @@ export function WorkerLayout({
         {children}
       </main>
 
-      {/* ==========================================
-          BOTTOM NAVIGATION
-      =========================================== */}
-
+      {/* BOTTOM NAVIGATION */}
       <nav
         aria-label="Worker navigation"
         className="
@@ -290,13 +320,13 @@ export function WorkerLayout({
           pb-[env(safe-area-inset-bottom)]
         "
       >
-
-        <ul className="
-          mx-auto grid w-full
-          max-w-md grid-cols-4
-          px-2 py-2
-        ">
-
+        <ul
+          className="
+            mx-auto grid w-full
+            max-w-md grid-cols-4
+            px-2 py-2
+          "
+        >
           {tabs.map((tab) => {
             const active = isTabActive(
               pathname,
@@ -337,7 +367,6 @@ export function WorkerLayout({
                 >
 
                   {/* NAVIGATION ICON */}
-
                   <span
                     className={`
                       flex h-9 w-14
@@ -359,10 +388,7 @@ export function WorkerLayout({
                   </span>
 
                   {/* NAVIGATION LABEL */}
-
-                  <span className="
-                    max-w-full truncate
-                  ">
+                  <span className="max-w-full truncate">
                     {tab.label}
                   </span>
 
@@ -370,7 +396,6 @@ export function WorkerLayout({
               </li>
             );
           })}
-
         </ul>
       </nav>
 

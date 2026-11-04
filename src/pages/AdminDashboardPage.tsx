@@ -116,12 +116,6 @@ const EVENT_LABELS: Record<NoticeEventType, string> = {
   not_clear: 'Not clear',
 };
 
-const INITIAL_CATEGORY_COUNTS: Record<ComplaintCategory, number> = {
-  unsafe: 0,
-  unpaid_salary: 0,
-  harassment: 0,
-  other: 0,
-};
 
 // --------------------------------------------------
 // HELPER: FORMAT NUMBERS
